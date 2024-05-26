@@ -11,11 +11,11 @@ private struct TableGridRowTypeModifier<Trait> where Trait: _ViewTraitKey {
     public let value: Trait.Value
 }
 
-internal struct TableGridRowTypeKey: _ViewTraitKey {
+struct TableGridRowTypeKey: _ViewTraitKey {
     static var defaultValue: TableGridRowType = .header
 }
 
-internal enum TableGridRowType {
+enum TableGridRowType {
     case header
     case row
 }

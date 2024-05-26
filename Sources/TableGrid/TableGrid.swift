@@ -8,7 +8,11 @@
 import SwiftUI
 
 public struct TableGrid<Content: View>: View {
-    @ViewBuilder var content: Content
+    public var content: Content
+
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     public var body: some View {
         _VariadicView.Tree(TableGridLayout()) {
@@ -17,9 +21,9 @@ public struct TableGrid<Content: View>: View {
     }
 }
 
-private struct TableGridLayout: _VariadicView_UnaryViewRoot {
+public struct TableGridLayout: _VariadicView_UnaryViewRoot {
     @ViewBuilder
-    func body(children: _VariadicView.Children) -> some View {
+    public func body(children: _VariadicView.Children) -> some View {
         let last = children.last?.id
         VStack {
             ForEach(children) { child in

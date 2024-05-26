@@ -8,7 +8,11 @@
 import SwiftUI
 
 public struct TableGridHeader<Content: View>: View {
-    @ViewBuilder var content: Content
+    public var content: Content
+
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     public var body: some View {
         _VariadicView.Tree(TableGridHeaderTree()) {
@@ -29,6 +33,10 @@ public struct TableGridHeader<Content: View>: View {
 
 public struct TableGridRow<Content: View>: View {
     @ViewBuilder var content: Content
+
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     public var body: some View {
         _VariadicView.Tree(TableGridRowTree()) {
