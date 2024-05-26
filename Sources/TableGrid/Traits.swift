@@ -1,15 +1,11 @@
 //
-//  TableGridRowType.swift
+//  Traits.swift
 //  GridLayout
 //
 //  Created by Peter Kos on 5/25/24.
 //
 
 import SwiftUI
-
-private struct TableGridRowTypeModifier<Trait> where Trait: _ViewTraitKey {
-    public let value: Trait.Value
-}
 
 struct TableGridRowTypeKey: _ViewTraitKey {
     static var defaultValue: TableGridRowType = .header
@@ -18,4 +14,13 @@ struct TableGridRowTypeKey: _ViewTraitKey {
 enum TableGridRowType {
     case header
     case row
+}
+
+struct CellCount: LayoutValueKey {
+    static var defaultValue: Int = 0
+}
+
+// Should be useful
+struct CellSize: _ViewTraitKey {
+    static var defaultValue: CGSize = .zero
 }

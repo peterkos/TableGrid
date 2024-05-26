@@ -15,32 +15,18 @@ public struct TableGrid<Content: View>: View {
     }
 
     public var body: some View {
-        _VariadicView.Tree(TableGridLayout()) {
+        _VariadicView.Tree(TableGridLayoutRoot()) {
             content
         }
     }
 }
 
-public struct TableGridLayout: _VariadicView_UnaryViewRoot {
+public struct TableGridLayoutRoot: _VariadicView_UnaryViewRoot {
     @ViewBuilder
     public func body(children: _VariadicView.Children) -> some View {
-        let last = children.last?.id
-        VStack {
-            ForEach(children) { child in
-                VStack {
-                    child
-                    Text(child.id.description)
-                }
-                .background(
-                    // Old way:
-                    // child[TableGridRowTypeValue.self] == .row ? .blue : .clear
-                    child.hasTrait(TableGridRowTypeKey.self, value: .header) ? .blue : .clear
-                )
-
-                if child.id != last {
-                    Divider()
-                }
-            }
+        // FIXME: Make fully dynamic
+        TableGridLayout(rowCount: 2) {
+            children
         }
     }
 }
