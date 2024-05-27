@@ -21,18 +21,12 @@ public struct TableGridLayout: Layout {
         cache _: inout ()
     ) {
         var point = bounds.origin
-        let rows = subviews
-        // Rows
-        for rowIndex in stride(from: 0, to: rows.count - 1, by: colCount) {
-            let row = rows[rowIndex ... (rowIndex + colCount - 1)]
-            if rowIndex % colCount == 0 && rowIndex != 0 {
-                print("chip at \(rowIndex)")
-                point.x = bounds.origin.x
-                point.y += maxHeight(of: row)
-                print()
-            }
-            print("get \(rowIndex ... (rowIndex + colCount - 1))")
+        let rows = chunk(subviews, size: colCount)
+
+        for row in rows {
             layoutAsHStack(row, point: &point)
+            point.x = bounds.origin.x
+            point.y += maxHeight(of: row)
         }
     }
 
@@ -43,9 +37,9 @@ public struct TableGridLayout: Layout {
         return size
     }
 
-    // MARK: Layout helpers
+    // MARK: Layout
 
-    private func layoutAsHStack(_ views: LayoutSubviews, point: inout CGPoint) {
+    private func layoutAsHStack(_ views: [LayoutSubview], point: inout CGPoint) {
         for view in views {
             view.place(at: point, anchor: .topLeading, proposal: .unspecified)
             point.x += view.dimensions(in: .unspecified).width
@@ -54,11 +48,27 @@ public struct TableGridLayout: Layout {
 
     // MARK: Math helpers
 
+    private func maxHeight(of views: [LayoutSubview]) -> CGFloat {
+        var maxHeight: CGFloat = 0.0
+        for view in views {
+            maxHeight = max(maxHeight, view.dimensions(in: .unspecified).height)
+        }
+        return maxHeight
+    }
+
+    // TODO: figure out how to do type magic to make above work
     private func maxHeight(of views: LayoutSubviews) -> CGFloat {
         var maxHeight: CGFloat = 0.0
         for view in views {
             maxHeight = max(maxHeight, view.dimensions(in: .unspecified).height)
         }
         return maxHeight
+    }
+
+    /// Note: `[LayoutSubviews] ~= [[LayoutSubview]]`
+    private func chunk(_ elements: LayoutSubviews, size: Int) -> [[LayoutSubview]] {
+        stride(from: 0, to: elements.count - 1, by: size).map { i in
+            Array(elements[i ... (i + size - 1)])
+        }
     }
 }
