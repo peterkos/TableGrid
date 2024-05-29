@@ -25,7 +25,7 @@ public struct TableGridLayoutRoot: _VariadicView_UnaryViewRoot {
     @ViewBuilder
     public func body(children: _VariadicView.Children) -> some View {
         // FIXME: Make fully dynamic
-        TableGridLayout(rowCount: 2) {
+        TableGridLayout(rowCount: 3) {
             children
         }
     }
