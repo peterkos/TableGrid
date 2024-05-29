@@ -17,6 +17,12 @@ public struct TableGridLayout: Layout {
         rowCount
     }
 
+    /// Spacing between columns
+    var horizontalSpacing: CGFloat = 0.0
+
+    /// Spacing between rows
+    var verticalSpacing: CGFloat = 0
+
     public func placeSubviews(
         in bounds: CGRect,
         proposal _: ProposedViewSize,
@@ -26,34 +32,38 @@ public struct TableGridLayout: Layout {
         var point = bounds.origin
         let rows = chunkRows(subviews, size: rowCount)
         let cols = chunkCols(subviews, size: colCount)
+        let rowHeights = calcRowHeights(rows: rows)
         let colWidths = calcColumnWidths(cols: cols)
 
-        for row in rows {
+        for (rowIndex, row) in rows.enumerated() {
             layoutAsHStack(row, point: &point, colWidths: colWidths)
             point.x = bounds.origin.x
-            point.y += maxHeight(of: row)
+            point.y += rowHeights[rowIndex] ?? 0
         }
     }
 
     public func sizeThatFits(proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         var size: CGSize = .zero
-        size.height = maxHeight(of: subviews) * CGFloat(rowCount)
+        let rowWidths = calcRowHeights(rows: chunkRows(subviews, size: rowCount))
+        size.height = rowWidths.reduce(0) { result, width in
+            result + width
+        }
 
         let colWidths = calcColumnWidths(cols: chunkCols(subviews, size: colCount))
-        size.width = colWidths.reduce(0) { result, dict in
-            result + dict.value
+        size.width = colWidths.reduce(0) { result, width in
+            result + width
         }
         return size
     }
 
-    // MARK: Layout
+    // MARK: - Layout
 
-    private func layoutAsHStack(_ views: [LayoutSubview], point: inout CGPoint, colWidths: [ColIndex: CGFloat]) {
+    private func layoutAsHStack(_ views: [LayoutSubview], point: inout CGPoint, colWidths: [CGFloat]) {
         for (i, view) in views.enumerated() {
             view.place(at: point, anchor: .topLeading, proposal: .unspecified)
 
             // Do we not need to account for the view width?
-            if let colWidth = colWidths[i] {
+            if let colWidth = colWidths[safe: i] {
                 point.x += colWidth
             }
         }
@@ -114,11 +124,23 @@ extension TableGridLayout {
         return colMajor
     }
 
+    /// For row index `r`, `rowHeights[r] == maxHeight(row[r])`
+    private func calcRowHeights(rows: [[LayoutSubview]]) -> [CGFloat] {
+        var rowHeights: [CGFloat] = Array(repeating: 0.0, count: rowCount)
+        for (r, row) in rows.dropLast().enumerated() {
+            rowHeights[r] = maxHeight(of: row) + verticalSpacing
+        }
+        if let lastRow = rows.last {
+            rowHeights.append(maxHeight(of: lastRow))
+        }
+        return rowHeights
+    }
+
     /// For column index `c`, `columnWidths[c] == maxWidth(column[c])`
-    private func calcColumnWidths(cols: [[LayoutSubview]]) -> [ColIndex: CGFloat] {
-        var colWidths = [ColIndex: CGFloat]()
+    private func calcColumnWidths(cols: [[LayoutSubview]]) -> [CGFloat] {
+        var colWidths: [CGFloat] = Array(repeating: 0.0, count: colCount)
         for (c, col) in cols.enumerated() {
-            colWidths[c] = maxWidth(of: col)
+            colWidths[c] = maxWidth(of: col) + horizontalSpacing
         }
         return colWidths
     }
